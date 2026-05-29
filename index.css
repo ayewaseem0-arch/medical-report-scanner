@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #fdfdfd;
+  --color-bg-warm: #f5f8f6;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-accent: #0f766e; /* teal-700 */
+  --color-accent-dim: #0d9488;
+  --color-accent-bright: #10b981; /* emerald-500 */
+  --color-coral: #ef4444;
+  --color-coral-dim: #991b1b;
+  --color-amber: #f59e0b;
+  --color-indigo: #6366f1;
+  --color-violet: #8b5cf6;
+  --color-text-primary: #040a08;
+  --color-text-secondary: #374151;
+  --color-text-muted: #9ca3af;
+  --color-border: #e5e7eb;
+  --color-border-bright: #d1d5db;
+  
+  --custom-glow-1: rgba(16, 185, 129, 0.08);
+  --custom-glow-2: rgba(99, 102, 241, 0.06);
+  --custom-noise-opacity: 0.1;
+  
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --animate-sos-pulse-fast: sos-pulse-fast 0.54s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-sos-pulse-slow: sos-pulse-slow 1.08s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+  @keyframes sos-pulse-fast {
+    0% {
+      transform: scale(1);
+      opacity: 0.85;
+    }
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  @keyframes sos-pulse-slow {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1.85);
+      opacity: 0;
+    }
+  }
+}
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-bg: #020617;
+  --color-bg-warm: #0b1120;
+  --color-surface: #0f172a;
+  --color-surface-raised: #1d283a;
+  --color-accent: #10b981;
+  --color-accent-dim: #059669;
+  --color-accent-bright: #34d399;
+  --color-coral: #f87171;
+  --color-coral-dim: #ef4444;
+  --color-amber: #fbbf24;
+  --color-indigo: #818cf8;
+  --color-violet: #a78bfa;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #475569;
+  --color-border: #1e293b;
+  --color-border-bright: #3b4a61;
+  
+  --custom-glow-1: rgba(16, 185, 129, 0.15);
+  --custom-glow-2: rgba(99, 102, 241, 0.1);
+  --custom-noise-opacity: 0.3;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text-primary antialiased transition-colors duration-300;
+    font-family: var(--font-sans);
+  }
+  
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+  }
+}
+
+/* Clean, clutter-free scrollbar hiding */
+*::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+* {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
+  opacity: var(--custom-noise-opacity);
+  pointer-events: none;
+  z-index: 50;
+  transition: opacity 0.3s ease;
+}
+
+.radial-glow {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 15% 20%, var(--custom-glow-1) 0%, transparent 50%),
+              radial-gradient(ellipse at 85% 80%, var(--custom-glow-2) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.3s ease;
+}
+
+@media print {
+  header, footer, button, .radial-glow, .noise-overlay, .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .bg-surface, .bg-bg-warm {
+    background: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+  }
+  
+  h1, h2, h3, .text-accent {
+    color: #132b1f !important;
+  }
+}

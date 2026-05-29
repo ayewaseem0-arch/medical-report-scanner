@@ -1,0 +1,180 @@
+{
+  "entities": {
+    "Feedback": {
+      "title": "User Feedback",
+      "description": "User feedback on analysis accuracy and usefulness",
+      "type": "object",
+      "properties": {
+        "analysisId": {
+          "type": "string",
+          "description": "Reference to the analysis session or report ID"
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Star rating from 1 to 5",
+          "enum": [1, 2, 3, 4, 5]
+        },
+        "useful": {
+          "type": "boolean",
+          "description": "Whether the user found the information useful"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Optional user comment"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who provided feedback"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the feedback was submitted"
+        }
+      },
+      "required": ["rating", "useful", "createdAt"]
+    },
+    "SavedReport": {
+      "title": "Saved Report",
+      "description": "Saved clinical report with OCR and AI analyzed elements",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the report"
+        },
+        "name": {
+          "type": "string",
+          "description": "Custom user-provided name"
+        },
+        "date": {
+          "type": "string",
+          "description": "Format date of report analysis"
+        },
+        "mode": {
+          "type": "string",
+          "description": "Report scanning category mode",
+          "enum": ["lab", "medicine", "symptoms"]
+        },
+        "data": {
+          "type": "object",
+          "description": "Nested JSON map containing clinical findings"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Submitting user identifier credential"
+        },
+        "timestamp": {
+          "type": "integer",
+          "description": "Milliseconds epoch value of analysis run"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The exact time record generated in Firestore"
+        }
+      },
+      "required": ["id", "name", "date", "mode", "data", "userId"]
+    },
+    "MedicineReminder": {
+      "title": "Medicine Reminder",
+      "description": "Schedule alerts configured for drug therapeutics",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique notification check id"
+        },
+        "name": {
+          "type": "string",
+          "description": "Clinical drug descriptor tag"
+        },
+        "time": {
+          "type": "string",
+          "description": "Formatted alarm timer context"
+        },
+        "date": {
+          "type": "string",
+          "description": "Specific single execution date target"
+        },
+        "recurring": {
+          "type": "boolean",
+          "description": "Whether the alert triggers repeatedly daily"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether notifications are active or silenced"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The owner of this therapeutic reminder"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp in Firestore"
+        }
+      },
+      "required": ["id", "name", "time", "recurring", "active", "userId"]
+    },
+    "AnalysisRun": {
+      "title": "Analysis Run Log",
+      "description": "Server-side clinical analysis session telemetry event",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User identifier who executed the session"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The server-side execution timestamp"
+        },
+        "analysisType": {
+          "type": "string",
+          "description": "Active diagnostic analyzer pipeline category"
+        },
+        "language": {
+          "type": "string",
+          "description": "Prompt response language locale translation"
+        },
+        "country": {
+          "type": "string",
+          "description": "Configured regional guidelines parameter"
+        },
+        "textLength": {
+          "type": "integer",
+          "description": "Total length of input biological OCR text data"
+        },
+        "hasImage": {
+          "type": "boolean",
+          "description": "Whether an attachment upload was processed"
+        },
+        "status": {
+          "type": "string",
+          "description": "Outcome success state of Gemini model pipeline"
+        }
+      },
+      "required": ["timestamp", "analysisType", "language", "status"]
+    }
+  },
+  "firestore": {
+    "/feedback/{feedbackId}": {
+      "schema": "Feedback",
+      "description": "Collection for storing user feedback"
+    },
+    "/reports/{reportId}": {
+      "schema": "SavedReport",
+      "description": "Clinical report records saved to secure online cloud"
+    },
+    "/reminders/{reminderId}": {
+      "schema": "MedicineReminder",
+      "description": "Medicine reminders config synced with clinical profile"
+    },
+    "/analyses_runs/{runId}": {
+      "schema": "AnalysisRun",
+      "description": "Telemetry logs tracking clinical analytics executions"
+    }
+  }
+}

@@ -1,0 +1,121 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // 3. Entity Validation Helpers
+    function isValidFeedback(data) {
+      return data.keys().hasAll(['rating', 'useful', 'createdAt', 'userId']) &&
+             data.keys().size() <= 6 &&
+             data.rating is int && data.rating >= 1 && data.rating <= 5 &&
+             data.useful is bool &&
+             data.userId == request.auth.uid &&
+             data.createdAt == request.time &&
+             (data.get('analysisId', '') is string && data.get('analysisId', '').size() <= 128) &&
+             (data.get('comment', '') is string && data.get('comment', '').size() <= 1000);
+    }
+
+    function isValidReport(data) {
+      return data.keys().hasAll(['id', 'name', 'date', 'mode', 'data', 'userId']) &&
+             data.keys().size() <= 9 &&
+             data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() <= 200 &&
+             data.date is string && data.date.size() <= 50 &&
+             data.mode is string && (data.mode == 'lab' || data.mode == 'medicine' || data.mode == 'symptoms') &&
+             data.data is map &&
+             data.userId == request.auth.uid &&
+             (!data.keys().hasAll(['timestamp']) || (data.timestamp is int || data.timestamp is float)) &&
+             (!data.keys().hasAll(['createdAt']) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
+    function isValidReminder(data) {
+      return data.keys().hasAll(['id', 'name', 'time', 'recurring', 'active', 'userId']) &&
+             data.keys().size() <= 8 &&
+             data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() <= 200 &&
+             data.time is string && data.time.size() <= 50 &&
+             (data.get('date', '') is string && data.get('date', '').size() <= 100) &&
+             data.recurring is bool &&
+             data.active is bool &&
+             data.userId == request.auth.uid &&
+             (!data.keys().hasAll(['createdAt']) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
+    function isValidAnalysisRun(data) {
+      return data.keys().hasAll(['timestamp', 'analysisType', 'language', 'status']) &&
+             data.keys().size() <= 9 &&
+             data.analysisType is string && data.analysisType.size() <= 100 &&
+             data.language is string && data.language.size() <= 50 &&
+             data.status is string && data.status.size() <= 50 &&
+             (data.get('userId', '') is string && data.get('userId', '').size() <= 128) &&
+             (data.get('country', '') is string && data.get('country', '').size() <= 100) &&
+             (data.get('textLength', 0) is int) &&
+             (data.get('hasImage', false) is bool);
+    }
+
+    // 4. Collection Matches
+
+    // Feedback
+    match /feedback/{feedbackId} {
+      allow create: if isSignedIn() && isValidId(feedbackId) && isValidFeedback(incoming());
+      allow read: if isAdmin();
+    }
+
+    // Reports Cloud Vault
+    match /reports/{reportId} {
+      allow create: if isSignedIn() && isValidId(reportId) && isValidReport(incoming());
+      allow read: if isSignedIn() && existing().userId == request.auth.uid;
+      allow update: if isSignedIn() && isValidId(reportId) && existing().userId == request.auth.uid && isValidReport(incoming());
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Medicine Reminders
+    match /reminders/{reminderId} {
+      allow create: if isSignedIn() && isValidId(reminderId) && isValidReminder(incoming());
+      allow read: if isSignedIn() && existing().userId == request.auth.uid;
+      allow update: if isSignedIn() && isValidId(reminderId) && existing().userId == request.auth.uid && isValidReminder(incoming());
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Server-side telemetry run logs
+    match /analyses_runs/{runId} {
+      allow create: if isValidId(runId) && isValidAnalysisRun(incoming());
+      allow read: if isAdmin();
+    }
+
+    // User Profiles
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Administrators Profile
+    match /admins/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false;
+    }
+  }
+}

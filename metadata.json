@@ -1,0 +1,12 @@
+{
+  "name": "MedScan — AI Health Report Analyzer",
+  "description": "Smart medical report analysis using AI. Upload PDF or scan reports to get instant explanations, prevention tips, and health insights.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
